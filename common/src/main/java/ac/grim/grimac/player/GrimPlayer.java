@@ -142,10 +142,11 @@ public class GrimPlayer implements GrimUser {
     public double lastX;
     public double lastY;
     public double lastZ;
-    public float xRot;
-    public float yRot;
-    public float lastXRot;
-    public float lastYRot;
+    // mojang uses xRot pitch and yRot for yaw
+    public float yaw;
+    public float pitch;
+    public float lastYaw;
+    public float lastPitch;
     public boolean onGround;
     public boolean lastOnGround;
     public boolean isSneaking;
@@ -952,7 +953,7 @@ public class GrimPlayer implements GrimUser {
 
     // TODO (Cross-platform) keep track of world at packet level; do not rely on potentially non-lag-compensated platformPlayer.getWorld()
     public Location getLocation() {
-        return new Location(platformPlayer.getWorld(), this.x, this.y, this.z, this.xRot, this.yRot);
+        return new Location(platformPlayer.getWorld(), this.x, this.y, this.z, this.yaw, this.pitch);
     }
 
     public int getViaTranslatedClientBlockID(int blockStateId) {

@@ -180,8 +180,7 @@ public class GrimVersion implements BuildableCommand {
                         return Status.OUTDATED;
                     }
                     return Status.AHEAD;
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) {}
                 return Status.UNKNOWN;
             }
 
@@ -206,7 +205,7 @@ public class GrimVersion implements BuildableCommand {
                     return null;
                 }
 
-                return new int[]{major, minor, patch};
+                return new int[] { major, minor, patch };
             }
 
             private static int parseInt(String str) {

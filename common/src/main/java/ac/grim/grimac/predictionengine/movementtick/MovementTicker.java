@@ -99,7 +99,7 @@ public class MovementTicker {
         float xxa = (float) player.predictedVelocity.input.getX();
         float zza = (float) player.predictedVelocity.input.getZ();
 
-        float yawInRadians = player.xRot * (float) (Math.PI / 180.0);
+        float yawInRadians = player.yaw * (float) (Math.PI / 180.0);
         double sin = player.trigHandler.sin(yawInRadians);
         double cos = player.trigHandler.cos(yawInRadians);
         double g = xxa * cos - zza * sin;

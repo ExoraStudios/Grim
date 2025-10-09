@@ -284,6 +284,6 @@ public class PredictionEngineBoat extends PredictionEngine {
             f -= 0.005F;
         }
 
-        vector.add(new Vector3dm(player.trigHandler.sin(-player.xRot * ((float) Math.PI / 180F)) * f, 0, (double) (player.trigHandler.cos(player.xRot * ((float) Math.PI / 180F)) * f)));
+        vector.add(new Vector3dm(player.trigHandler.sin(-player.yaw * ((float) Math.PI / 180F)) * f, 0, (double) (player.trigHandler.cos(player.yaw * ((float) Math.PI / 180F)) * f)));
     }
 }

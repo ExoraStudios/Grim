@@ -95,7 +95,7 @@ fun extractEmbeddedJars(jarFile: File, project: Project): Set<DependencyIdentifi
                                     ?: throw IllegalStateException("Missing 'id' in fabric.mod.json of embedded JAR: $entryName")
                                 val idWithDots = id.replace("_", ".")
                                 val lastDotIndex = idWithDots.lastIndexOf(".")
-                                val group = if (lastDotIndex != -1) idWithDots.substring(0, lastDotIndex) else ""
+                                val group = if (lastDotIndex != -1) idWithDots.take(lastDotIndex) else ""
 
                                 // Extract name and version from the JAR filename
                                 val jarName = entryName.substringAfterLast("/").removeSuffix(".jar")
@@ -127,7 +127,7 @@ fun parseNameAndVersionFromJarName(jarName: String): Pair<String, String>? {
     val versionStartIndex = versionStartMatch.range.first
 
     // Split the JAR name into name and version at the version start index
-    val name = jarName.substring(0, versionStartIndex)
+    val name = jarName.take(versionStartIndex)
     val version = jarName.substring(versionStartIndex + 1) // Skip the hyphen
 
     return if (name.isNotEmpty() && version.isNotEmpty()) {

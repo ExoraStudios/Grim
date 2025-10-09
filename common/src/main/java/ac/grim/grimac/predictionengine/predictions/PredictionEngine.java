@@ -817,7 +817,7 @@ public class PredictionEngine {
 
                                 Vector3dm input = transformInputsToVector(player, new Vector3dm(strafe, 0, forward));
                                 VectorData result = new VectorData(possibleLastTickOutput.vector.clone()
-                                        .add(getMovementResultFromInput(player, input, speed, player.xRot)),
+                                        .add(getMovementResultFromInput(player, input, speed, player.yaw)),
                                         possibleLastTickOutput, VectorData.VectorType.InputResult);
                                 result.input = input;
                                 if (applyStuckSpeed != 0) {
