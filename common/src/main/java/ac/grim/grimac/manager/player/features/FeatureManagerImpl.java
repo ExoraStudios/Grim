@@ -8,7 +8,6 @@ import ac.grim.grimac.manager.player.features.types.*;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.common.ConfigReloadObserver;
 import com.google.common.collect.ImmutableSet;
-import lombok.Getter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 

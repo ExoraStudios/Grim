@@ -13,10 +13,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.description.Description;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Properties;
@@ -38,7 +38,7 @@ public class GrimDump implements BuildableCommand {
         );
     }
 
-    private void handleDump(@NonNull CommandContext<Sender> context) {
+    private void handleDump(@NotNull CommandContext<Sender> context) {
         Sender sender = context.sender();
 
         if (link != null) {

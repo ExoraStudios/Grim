@@ -6,6 +6,7 @@ import ac.grim.grimac.predictionengine.predictions.PredictionEngineNormal;
 import ac.grim.grimac.utils.data.VectorData;
 import ac.grim.grimac.utils.data.packetentity.PacketEntityCamel;
 import ac.grim.grimac.utils.data.packetentity.PacketEntityHorse;
+import ac.grim.grimac.utils.math.GrimMath;
 import ac.grim.grimac.utils.math.Vector3dm;
 import ac.grim.grimac.utils.nmsutil.BlockProperties;
 import ac.grim.grimac.utils.nmsutil.JumpPower;
@@ -96,8 +97,9 @@ public final class PredictionEngineRideableUtils {
 
         player.vehicleData.horseJumping = true;
 
-        float f2 = player.trigHandler.sin(player.yaw * ((float) Math.PI / 180F));
-        float f3 = player.trigHandler.cos(player.yaw * ((float) Math.PI / 180F));
+        float yawRadians = GrimMath.radians(player.yaw);
+        float f2 = player.trigHandler.sin(yawRadians);
+        float f3 = player.trigHandler.cos(yawRadians);
 
         for (VectorData vectorData : possibleVectors) {
             vectorData.vector.setY(jumpVelocity);

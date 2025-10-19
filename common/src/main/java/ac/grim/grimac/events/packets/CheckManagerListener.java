@@ -68,7 +68,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             if (Materials.isPlaceableWaterBucket(blockPlace.itemStack.getType()) && PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_13)) {
                 blockPlace.replaceClicked = true; // See what's in the existing place
                 WrappedBlockState existing = blockPlace.getExistingBlockData();
-                if (!(boolean) existing.getInternalData().getOrDefault(StateValue.WATERLOGGED, true)) {
+                if (existing.hasProperty(StateValue.WATERLOGGED) && !existing.isWaterlogged()) {
                     // Strangely, the client does not predict waterlogged placements
                     didPlace = true;
                 }
@@ -104,7 +104,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
             player.z = player.packetStateData.lastClaimedPosition.getZ();
 
             boolean lastSneaking = player.isSneaking;
-            player.isSneaking = snapshot.isSneaking();
+            player.isSneaking = snapshot.sneaking();
 
             if (player.inVehicle()) {
                 Vector3d posFromVehicle = BoundingBoxSize.getRidingOffsetFromVehicle(player.compensatedEntities.self.getRiding(), player);
@@ -122,8 +122,8 @@ public class CheckManagerListener extends PacketListenerAbstract {
             }
 
             player.compensatedWorld.startPredicting();
-            handleBlockPlaceOrUseItem(snapshot.getWrapper(), player);
-            player.compensatedWorld.stopPredicting(snapshot.getWrapper());
+            handleBlockPlaceOrUseItem(snapshot.wrapper(), player);
+            player.compensatedWorld.stopPredicting(snapshot.wrapper());
 
             player.x = lastX;
             player.y = lastY;
@@ -308,7 +308,7 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
             if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_13)) {
                 WrappedBlockState existing = blockPlace.getExistingBlockData();
-                if (existing.getInternalData().containsKey(StateValue.WATERLOGGED)) { // waterloggable
+                if (existing.hasProperty(StateValue.WATERLOGGED)) { // waterloggable
                     existing.setWaterlogged(false);
                     blockPlace.set(existing);
                     placed = true;
@@ -597,6 +597,10 @@ public class CheckManagerListener extends PacketListenerAbstract {
 
         if (event.getPacketType() == PacketType.Play.Server.OPEN_WINDOW) {
             player.latencyUtils.addRealTimeTask(player.lastTransactionSent.get(), () -> player.serverOpenedInventoryThisTick = true);
+        }
+
+        if (event.getPacketType() == PacketType.Play.Server.BUNDLE) {
+            player.packetStateData.sendingBundlePacket = !player.packetStateData.sendingBundlePacket;
         }
 
         player.checkManager.onPacketSend(event);

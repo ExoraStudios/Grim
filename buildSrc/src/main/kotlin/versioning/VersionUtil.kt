@@ -37,14 +37,14 @@ object VersionUtil {
         val modifiers = buildList {
             if (!BuildConfig.shadePE) add("lite")
             if (!BuildConfig.relocate) add("no_relocate")
-        }.takeIf { it.isNotEmpty() }?.joinToString("-")
+        }.joinToString("-").takeIf { it.isNotEmpty() }
 
         return buildString {
             append(baseVersion)
             append("-")
             branch?.let { append("$it-") }
             append(commitHash)
-            modifiers?.let { append("+$modifiers") }
+            modifiers?.let { append("+$it") }
         }
     }
 
@@ -53,18 +53,15 @@ object VersionUtil {
      */
     fun getGitCommitHash(full: Boolean = false): String {
         val stdout = ByteArrayOutputStream()
-        val command = if (full) {
-            listOf("git", "rev-parse", "HEAD")
-        } else {
-            listOf("git", "rev-parse", "--short", "HEAD")
-        }
+        val command = listOfNotNull("git", "rev-parse", if (full) null else "--short", "HEAD")
         ProcessBuilder(command)
             .redirectErrorStream(true)
             .start()
             .apply { waitFor() }
             .inputStream
             .use { stdout.writeBytes(it.readAllBytes()) }
-        return stdout.toString().trim()
+        val fullCommit = stdout.toString().trim()
+        return fullCommit.take(minOf(fullCommit.length, 7))
     }
 
     /**
@@ -88,14 +85,14 @@ object VersionUtil {
         val branch = stdout.toString().trim()
             .replace(Regex("[^a-zA-Z0-9_.-]+"), "_")
             .replace(Regex("_{2,}"), "_")
-            .replace(Regex("^[ ._-]+|[ ._-]+$"), "")
-            .replace(Regex("^heads_"), "")
+            .trim(' ', '.', '_', '-')
+            .removePrefix("heads_")
 
         val mainBranch = System.getenv("GRIM_MAIN_BRANCH") ?: "2.0"
 
         return when (branch) {
             "main", mainBranch -> null                    // ← ignore these branches
-            else           -> branch
+            else -> branch
         }
     }
 
@@ -108,7 +105,7 @@ object VersionUtil {
                 .apply { waitFor() }
                 .inputStream.use { stdout.writeBytes(it.readAllBytes()) }
             return stdout.toString().trim()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return "unknown"
         }
     }

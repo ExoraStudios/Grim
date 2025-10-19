@@ -1,10 +1,12 @@
 package ac.grim.grimac.utils.common;
 
 import ac.grim.grimac.utils.anticheat.LogUtil;
+import lombok.experimental.UtilityClass;
 
 import java.io.InputStream;
 import java.util.Properties;
 
+@UtilityClass
 public class PropertiesUtil {
 
     public static Properties readProperties(Class<?> clazz, String path) {

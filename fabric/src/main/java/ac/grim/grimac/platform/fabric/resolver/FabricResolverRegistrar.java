@@ -4,6 +4,7 @@ import ac.grim.grimac.api.plugin.BasicGrimPlugin;
 import ac.grim.grimac.api.plugin.GrimPlugin;
 import ac.grim.grimac.events.GrimExtensionManager;
 import ac.grim.grimac.platform.fabric.utils.message.JULoggerFactory;
+import lombok.RequiredArgsConstructor;
 import net.fabricmc.api.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * Manages the registration of Fabric-specific resolvers with the GrimExtensionManager.
  * This class is designed to be instantiated once during plugin startup.
  */
+@RequiredArgsConstructor
 public final class FabricResolverRegistrar {
 
     private final GrimExtensionManager extensionManager;
@@ -35,10 +37,6 @@ public final class FabricResolverRegistrar {
     private final Map<ModContainer, GrimPlugin> modContainerCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, GrimPlugin> classCache = new ConcurrentHashMap<>();
     private final Map<Object, GrimPlugin> entrypointCache = new ConcurrentHashMap<>();
-
-    public FabricResolverRegistrar(GrimExtensionManager extensionManager) {
-        this.extensionManager = extensionManager;
-    }
 
     /**
      * Registers all the Fabric-specific resolvers in order of performance (fastest to slowest).

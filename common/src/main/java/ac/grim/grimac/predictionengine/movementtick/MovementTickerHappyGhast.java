@@ -44,21 +44,21 @@ public class MovementTickerHappyGhast extends MovementTickerLivingVehicle {
     public void doNormalMove(float blockFriction) {
         PacketEntityHappyGhast happyGhastPacket = (PacketEntityHappyGhast) player.compensatedEntities.self.getRiding();
         float flyingSpeed = (float) happyGhastPacket.getAttributeValue(Attributes.FLYING_SPEED) * 5.0F / 3.0F;
-        new PredictionEngineHappyGhast(movementInput, 0.91F).guessBestMovement(flyingSpeed, player);
+        new PredictionEngineHappyGhast(this.movementInput, 0.91F).guessBestMovement(flyingSpeed, player);
     }
 
     @Override
     public void doLavaMove() {
         PacketEntityHappyGhast happyGhastPacket = (PacketEntityHappyGhast) player.compensatedEntities.self.getRiding();
         float flyingSpeed = (float) happyGhastPacket.getAttributeValue(Attributes.FLYING_SPEED) * 5.0F / 3.0F;
-        new PredictionEngineHappyGhast(movementInput, 0.5).guessBestMovement(flyingSpeed, player);
+        new PredictionEngineHappyGhast(this.movementInput, 0.5).guessBestMovement(flyingSpeed, player);
     }
 
     @Override
     public void doWaterMove(float swimSpeed, boolean isFalling, float swimFriction) {
         PacketEntityHappyGhast happyGhastPacket = (PacketEntityHappyGhast) player.compensatedEntities.self.getRiding();
         float flyingSpeed = (float) happyGhastPacket.getAttributeValue(Attributes.FLYING_SPEED) * 5.0F / 3.0F;
-        new PredictionEngineHappyGhast(movementInput, 0.8F).guessBestMovement(flyingSpeed, player);
+        new PredictionEngineHappyGhast(this.movementInput, 0.8F).guessBestMovement(flyingSpeed, player);
     }
 
 }

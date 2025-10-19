@@ -34,7 +34,6 @@ import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.util.Vector3i;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -556,6 +555,7 @@ public class BlockPlace {
             // 1.8 clients will simply not send the place when it fails, thanks mojang.
             if (player.getClientVersion().isNewerThan(ClientVersion.V_1_8)) {
                 for (PacketEntity entity : player.compensatedEntities.entityMap.values()) {
+                    if (!entity.canHit()) continue;
                     SimpleCollisionBox interpBox = entity.getPossibleCollisionBoxes();
 
                     final double scale = entity.getAttributeValue(Attributes.SCALE);
@@ -592,7 +592,7 @@ public class BlockPlace {
 
         // Check for waterlogged
         if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_13)) {
-            if (state.getInternalData().containsKey(StateValue.WATERLOGGED)) { // waterloggable
+            if (state.hasProperty(StateValue.WATERLOGGED)) { // waterloggable
                 state.setWaterlogged(existingState.getType() == StateTypes.WATER && existingState.getLevel() == 0);
             }
         }

@@ -18,11 +18,6 @@ java {
     withJavadocJar()
 }
 
-// Lombok configuration
-//lombok {
-//    version.set("1.18.30") // Use the version from your version catalog if available
-//}
-
 // Spotless configuration
 spotless {
     java {

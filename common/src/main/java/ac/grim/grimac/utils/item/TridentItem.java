@@ -10,10 +10,6 @@ public class TridentItem extends ItemBehaviour {
 
     public static final TridentItem INSTANCE = new TridentItem();
 
-    private TridentItem() {
-        if (INSTANCE != null) throw new UnsupportedOperationException();
-    }
-
     @Override
     public boolean canUse(ItemStack item, CompensatedWorld world, GrimPlayer player, InteractionHand hand) {
         if (this.nextDamageWillBreak(item)) {
