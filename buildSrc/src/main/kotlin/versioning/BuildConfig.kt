@@ -53,7 +53,7 @@ object BuildConfig {
      * ```
      */
     fun init(project: Project) {
-        _shadePE = resolveBool(project, "shadePE", altKey = "SHADE_PE", default = true)
+        _shadePE = resolveBool(project, "shadePE", altKey = "SHADE_PE", default = false)
         _relocate = resolveBool(project, "relocate", altKey = "RELOCATE_JAR", default = true)
         _release = resolveBool(project, "release", default = false)
         _mavenLocalOverride = resolveBool(project, "mavenLocalOverride", default = false)

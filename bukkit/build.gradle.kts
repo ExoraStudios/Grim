@@ -86,6 +86,7 @@ dependencies {
     } else {
         compileOnly(libs.packetevents.spigot)
     }
+
     implementation(libs.cloud.paper)
     implementation(libs.adventure.platform.bukkit)
 
