@@ -196,7 +196,6 @@ public class MovementCheckRunner extends Check implements PositionCheck {
             player.vehicleData.wasVehicleSwitch = false;
 
             if (riding != null) {
-                Vector3dm pos = new Vector3dm(player.x, player.y, player.z);
                 SimpleCollisionBox interTruePositions = riding.getPossibleCollisionBoxes();
 
                 // We shrink the expanded bounding box to what the packet positions can be, for a smaller box
@@ -206,7 +205,7 @@ public class MovementCheckRunner extends Check implements PositionCheck {
                 interTruePositions.expand(-width, 0, -width);
                 interTruePositions.expandMax(0, -height, 0);
 
-                Vector3dm cutTo = VectorUtils.cutBoxToVector(pos, interTruePositions);
+                Vector3dm cutTo = VectorUtils.cutBoxToVector(player.x, player.y, player.z, interTruePositions);
 
                 // Now we need to simulate a tick starting at the most optimal position
                 // The start position is never sent, so we assume the most optimal start position
@@ -567,7 +566,7 @@ public class MovementCheckRunner extends Check implements PositionCheck {
         // Patch sprint jumping with elytra exploit
         if (player.platformPlayer != null && player.isGliding && player.predictedVelocity.isJump() && player.isSprinting && !allowSprintJumpingWithElytra) {
             SetbackTeleportUtil.SetbackPosWithVector lastKnownGoodPosition = player.getSetbackTeleportUtil().lastKnownGoodPosition;
-            lastKnownGoodPosition.setVector(lastKnownGoodPosition.getVector().multiply(new Vector3dm(0.6 * 0.91, 1, 0.6 * 0.91)));
+            lastKnownGoodPosition.setVector(lastKnownGoodPosition.getVector().multiply(0.6 * 0.91, 1, 0.6 * 0.91));
             player.getSetbackTeleportUtil().executeNonSimulatingSetback();
         }
 

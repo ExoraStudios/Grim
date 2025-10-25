@@ -516,7 +516,7 @@ public enum CollisionData implements CollisionFactory {
         }
 
         return new HexCollisionBox(6.5D, 6.5D, 0.0D, 9.5D, 9.5D, 16.0D);
-    }, StateTypes.CHAIN, StateTypes.IRON_CHAIN),
+    }, Materials.getChains().toArray(new StateType[0])),
 
     CHORUS_PLANT(new DynamicChorusPlant(), StateTypes.CHORUS_PLANT),
 

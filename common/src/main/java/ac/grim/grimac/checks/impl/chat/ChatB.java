@@ -14,7 +14,6 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCh
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientChatCommandUnsigned;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientChatMessage;
 
-
 // this can false from click events, but I doubt this would actually
 // happen unless they're trying to flag, or if the server is set up badly
 @CheckData(name = "ChatB", description = "Invalid chat message")

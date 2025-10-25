@@ -233,7 +233,7 @@ public class MovementTicker {
         player.predictedVelocity = new VectorData(collide.clone(), player.predictedVelocity.lastVector, player.predictedVelocity.vectorType);
 
         float f = BlockProperties.getBlockSpeedFactor(player, player.mainSupportingBlockData, new Vector3d(player.x, player.y, player.z));
-        player.clientVelocity.multiply(new Vector3dm(f, 1, f));
+        player.clientVelocity.multiply(f, 1, f);
 
         if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_21_2)) {
             return;
@@ -446,14 +446,14 @@ public class MovementTicker {
 
                 // Lava movement changed in 1.16
                 if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_16) && player.slightlyTouchingLava) {
-                    player.clientVelocity = player.clientVelocity.multiply(new Vector3dm(0.5D, 0.800000011920929D, 0.5D));
+                    player.clientVelocity = player.clientVelocity.multiply(0.5D, 0.800000011920929D, 0.5D);
                     player.clientVelocity = FluidFallingAdjustedMovement.getFluidFallingAdjustedMovement(player, playerGravity, isFalling, player.clientVelocity);
                 } else {
                     player.clientVelocity.multiply(0.5D);
                 }
 
                 if (player.hasGravity)
-                    player.clientVelocity.add(new Vector3dm(0.0D, -playerGravity / 4.0D, 0.0D));
+                    player.clientVelocity.add(0.0D, -playerGravity / 4.0D, 0.0D);
 
             } else if (player.isGliding) {
                 if (player.getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_21_5) && Collisions.onClimbable(player, player.lastX, player.lastY, player.lastZ)) {

@@ -52,4 +52,15 @@ public abstract class AbstractFabricGrimEntity implements GrimEntity {
                 this.entity.getPitch(1.0F)
         );
     }
+
+    @Override
+    public double distanceSquared(double oX, double oY, double oZ) {
+        double x = this.entity.getX();
+        double y = this.entity.getY();
+        double z = this.entity.getZ();
+        double distX = (x - oX) * (x - oX);
+        double distY = (y - oY) * (y - oY);
+        double distZ = (z - oZ) * (z - oZ);
+        return distX + distY + distZ;
+    }
 }
