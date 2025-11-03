@@ -22,6 +22,7 @@ import ac.grim.grimac.checks.type.PacketCheck;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.collisions.datatypes.SimpleCollisionBox;
 import ac.grim.grimac.utils.data.packetentity.PacketEntity;
+import ac.grim.grimac.utils.data.packetentity.PacketEntitySizeable;
 import ac.grim.grimac.utils.data.packetentity.dragon.PacketEntityEnderDragonPart;
 import ac.grim.grimac.utils.math.Vector3dm;
 import ac.grim.grimac.utils.nmsutil.ReachUtils;
@@ -158,10 +159,16 @@ public class Reach extends Check implements PacketCheck {
             switch (result.type()) {
                 case REACH -> {
                     String added = ", type=" + reachEntity.type.getName().getKey();
+                    if (reachEntity instanceof PacketEntitySizeable sizeable) {
+                        added += ", size=" + sizeable.size;
+                    }
                     flagAndAlert(result.verbose() + added);
                 }
                 case HITBOX -> {
                     String added = "type=" + reachEntity.type.getName().getKey();
+                    if (reachEntity instanceof PacketEntitySizeable sizeable) {
+                        added += ", size=" + sizeable.size;
+                    }
                     player.checkManager.getCheck(Hitboxes.class).flagAndAlert(result.verbose() + added);
                 }
             }

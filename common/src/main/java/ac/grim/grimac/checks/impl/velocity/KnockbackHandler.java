@@ -1,6 +1,5 @@
 package ac.grim.grimac.checks.impl.velocity;
 
-import ac.grim.grimac.GrimAPI;
 import ac.grim.grimac.api.config.ConfigManager;
 import ac.grim.grimac.checks.Check;
 import ac.grim.grimac.checks.CheckData;
