@@ -100,6 +100,13 @@ public class SetbackTeleportUtil extends Check implements PostPredictionCheck {
         blockMovementsUntilResync(true, true);
     }
 
+    public void executeForceResyncNoSimulation() {
+        if (player.gamemode == GameMode.SPECTATOR || player.disableGrim)
+            return; // We don't care about spectators, they don't flag
+        if (lastKnownGoodPosition == null) return; // Player hasn't spawned yet
+        blockMovementsUntilResync(false, true);
+    }
+
     public void executeNonSimulatingSetback() {
         if (player.gamemode == GameMode.SPECTATOR || player.disableGrim)
             return; // We don't care about spectators, they don't flag
