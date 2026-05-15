@@ -1,7 +1,11 @@
 package ac.grim.grimac.command.commands;
 
 import ac.grim.grimac.GrimAPI;
+import ac.grim.grimac.api.AbstractCheck;
+import ac.grim.grimac.api.storage.backend.Backend;
 import ac.grim.grimac.api.storage.category.Categories;
+import ac.grim.grimac.api.storage.check.CheckCatalogRepairResult;
+import ac.grim.grimac.api.storage.check.CheckCatalogRow;
 import ac.grim.grimac.api.storage.history.HistoryService;
 import ac.grim.grimac.api.storage.history.SessionDetail;
 import ac.grim.grimac.api.storage.history.SessionSummary;
@@ -12,12 +16,17 @@ import ac.grim.grimac.api.storage.query.Page;
 import ac.grim.grimac.api.storage.query.Queries;
 import ac.grim.grimac.command.BuildableCommand;
 import ac.grim.grimac.command.render.HistoryComponentRenderer;
+import ac.grim.grimac.internal.storage.checks.CheckRegistry;
 import ac.grim.grimac.manager.datastore.DataStoreLifecycle;
 import ac.grim.grimac.platform.api.manager.cloud.CloudCommandAdapter;
 import ac.grim.grimac.platform.api.player.OfflinePlatformPlayer;
 import ac.grim.grimac.platform.api.sender.Sender;
+import ac.grim.grimac.player.GrimPlayer;
+import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.anticheat.MessageUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
@@ -30,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -90,6 +100,14 @@ public class GrimHistory implements BuildableCommand {
         SuggestionProvider<Sender> violationPageSuggestions = violationPageSuggestions();
         SuggestionProvider<Sender> targetSuggestions = targetSuggestions(adapter);
 
+        commandManager.command(
+                commandManager.commandBuilder("grim", "grimac")
+                        .literal("history", "hist")
+                        .literal("repair")
+                        .literal("check-ids")
+                        .permission("grim.history.repair")
+                        .handler(this::handleRepairCheckIds)
+        );
         // List, page 1
         commandManager.command(
                 applyFilterFlags(commandManager,
@@ -447,6 +465,132 @@ public class GrimHistory implements BuildableCommand {
                 sender, displayName, detail, detailed, verbose,
                 violationPage, pageSize, isOngoing);
         for (Component c : components) sender.sendMessage(c);
+    }
+
+    private void handleRepairCheckIds(CommandContext<Sender> context) {
+        Sender sender = context.sender();
+        DataStoreLifecycle lifecycle = GrimAPI.INSTANCE.getDataStoreLifecycle();
+        if (lifecycle == null || !lifecycle.isLoaded() || lifecycle.config() == null) {
+            sender.sendMessage(Component.text("History storage is disabled (see database.yml).", NamedTextColor.RED));
+            return;
+        }
+
+        String backendId = lifecycle.config().routing().get(Categories.VIOLATION);
+        if (backendId == null || backendId.equalsIgnoreCase("none")) {
+            sender.sendMessage(Component.text("No violation backend is routed; nothing to repair.", NamedTextColor.YELLOW));
+            return;
+        }
+
+        Backend backend = lifecycle.allBackendsForCommands().get(backendId);
+        if (backend == null) {
+            sender.sendMessage(Component.text("Violation backend '" + backendId + "' is not active.", NamedTextColor.RED));
+            return;
+        }
+
+        try {
+            logBoth(sender, Component.text(
+                    "Repairing history check ids on backend '" + backendId + "'...", NamedTextColor.AQUA));
+
+            int prewarmed = prewarmCatalogFromLiveChecks(lifecycle);
+            RepairPlan plan = buildRepairPlan(backend);
+            CheckCatalogRepairResult result = backend.repairCheckCatalog(
+                    plan.legacyToCatalogIds(), currentGrimVersion());
+            CheckRegistry registry = lifecycle.checkRegistryForCommands();
+            if (registry != null) registry.reload();
+
+            logBoth(sender, Component.text()
+                    .append(Component.text("Repair complete: ", NamedTextColor.GREEN))
+                    .append(Component.text(prewarmed + " live check definitions prewarmed, "))
+                    .append(Component.text(result.mappingsApplied() + " id mapping(s), "))
+                    .append(Component.text(result.violationsUpdated() + " violation row(s) rewritten, "))
+                    .append(Component.text(result.catalogVersionsUpdated() + " stub version row(s) fixed"))
+                    .build());
+            if (plan.ambiguousHashes() > 0 || plan.catalogIdCollisions() > 0) {
+                logBoth(sender, Component.text()
+                        .append(Component.text("Skipped ", NamedTextColor.YELLOW))
+                        .append(Component.text(plan.ambiguousHashes() + " ambiguous hash mapping(s), "))
+                        .append(Component.text(plan.catalogIdCollisions() + " catalog-id collision(s)."))
+                        .build());
+            }
+        } catch (Exception e) {
+            logBoth(sender, Component.text("Repair failed: " + e.getMessage(), NamedTextColor.RED));
+            LogUtil.error("v1 check-id repair failed via /grim history repair check-ids", e);
+        }
+    }
+
+    private static int prewarmCatalogFromLiveChecks(DataStoreLifecycle lifecycle) {
+        CheckRegistry registry = lifecycle.checkRegistryForCommands();
+        if (registry == null) return 0;
+        registry.reload();
+
+        int prewarmed = 0;
+        String version = currentGrimVersion();
+        Set<String> seenStableKeys = new HashSet<>();
+        for (GrimPlayer player : GrimAPI.INSTANCE.getPlayerDataManager().getEntries()) {
+            for (AbstractCheck check : player.checkManager.allChecks.values()) {
+                String stableKey = check.getStableKey();
+                if (stableKey == null || stableKey.isBlank()) continue;
+                if (!seenStableKeys.add(stableKey)) continue;
+                registry.intern(stableKey, check.getCheckName(), check.getDescription(), version);
+                prewarmed++;
+            }
+        }
+        registry.reload();
+        return prewarmed;
+    }
+
+    private static RepairPlan buildRepairPlan(Backend backend) {
+        Set<Integer> catalogIds = new HashSet<>();
+        Map<Integer, List<CheckCatalogRow>> byLegacyHash = new LinkedHashMap<>();
+        for (CheckCatalogRow row : backend.checkCatalog().loadAll()) {
+            catalogIds.add(row.checkId());
+            byLegacyHash.computeIfAbsent(row.stableKey().hashCode(), k -> new ArrayList<>()).add(row);
+        }
+
+        Map<Integer, Integer> repairIds = new LinkedHashMap<>();
+        int ambiguousHashes = 0;
+        int catalogIdCollisions = 0;
+        for (Map.Entry<Integer, List<CheckCatalogRow>> entry : byLegacyHash.entrySet()) {
+            int legacyId = entry.getKey();
+            List<CheckCatalogRow> owners = entry.getValue();
+            if (owners.size() != 1) {
+                ambiguousHashes += owners.size();
+                continue;
+            }
+            CheckCatalogRow row = owners.get(0);
+            if (legacyId == row.checkId()) continue;
+            if (catalogIds.contains(legacyId)) {
+                catalogIdCollisions++;
+                continue;
+            }
+            repairIds.put(legacyId, row.checkId());
+        }
+        return new RepairPlan(repairIds, ambiguousHashes, catalogIdCollisions);
+    }
+
+    private static String currentGrimVersion() {
+        return GrimAPI.INSTANCE.getExternalAPI().getGrimVersion();
+    }
+
+    private record RepairPlan(
+            Map<Integer, Integer> legacyToCatalogIds,
+            int ambiguousHashes,
+            int catalogIdCollisions) {}
+
+    private static void logBoth(Sender sender, Component msg) {
+        sender.sendMessage(msg);
+        LogUtil.info(plain(msg));
+    }
+
+    private static String plain(Component c) {
+        StringBuilder sb = new StringBuilder();
+        flatten(c, sb);
+        return sb.toString();
+    }
+
+    private static void flatten(Component c, StringBuilder sb) {
+        if (c instanceof TextComponent tc) sb.append(tc.content());
+        for (Component child : c.children()) flatten(child, sb);
     }
 
     private Cursor advanceToPage(HistoryService history, UUID uuid, int pageSize, int page) throws Exception {
