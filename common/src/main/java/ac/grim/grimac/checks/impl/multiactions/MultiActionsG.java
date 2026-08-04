@@ -3,6 +3,8 @@ package ac.grim.grimac.checks.impl.multiactions;
 import ac.grim.grimac.api.storage.verbose.Verbose;
 import ac.grim.grimac.checks.CheckData;
 import ac.grim.grimac.checks.type.BlockPlaceCheck;
+import ac.grim.grimac.checks.type.BlockPlaceListener;
+import ac.grim.grimac.checks.type.PacketReceiveListener;
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.utils.anticheat.update.BlockPlace;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
@@ -12,10 +14,13 @@ import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.BlockFace;
 
 @CheckData(name = "MultiActionsG", stableKey = "grim.multiactions.action_while_rowing", description = "Attacking or using items while rowing a boat", experimental = true)
-public class MultiActionsG extends BlockPlaceCheck {
-    private static final Verbose V =
-            Verbose.of("action=interact").or("action=attack").or("action=spectateEntity")
-                    .or("action=use").or("action=place"); // shape index == ACTION_* value
+public class MultiActionsG extends BlockPlaceCheck implements PacketReceiveListener, BlockPlaceListener {
+    private static final Verbose V = Verbose
+            .of("action=interact")
+            .or("action=attack")
+            .or("action=spectateEntity")
+            .or("action=use")
+            .or("action=place"); // shape index == ACTION_* value
 
     private static final int ACTION_INTERACT = 0;
     private static final int ACTION_ATTACK = 1;

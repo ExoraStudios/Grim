@@ -44,7 +44,7 @@ public class PacketEntitySelf extends PacketEntity {
         }
 
         getAttribute(Attributes.SCALE).orElseThrow().withSetRewriter((oldValue, newValue) -> {
-            if (player.getClientVersion().isOlderThanOrEquals(ClientVersion.V_1_20_5) || newValue == oldValue) {
+            if (player.getClientVersion().isOlderThan(ClientVersion.V_1_20_5) || newValue == oldValue) {
                 return oldValue;
             } else {
                 // Elytra, standing, sneaking (1.14)
@@ -150,7 +150,7 @@ public class PacketEntitySelf extends PacketEntity {
     @Override
     public void addPotionEffect(PotionType effect, int amplifier) {
         if (effect == PotionTypes.BLINDNESS && !hasPotionEffect(PotionTypes.BLINDNESS)) {
-            player.checkManager.getPostPredictionCheck(SprintD.class).startedSprintingBeforeBlind = player.isSprinting;
+            player.checkManager.getCheck(SprintD.class).startedSprintingBeforeBlind = player.isSprinting;
         }
 
         player.pointThreeEstimator.updatePlayerPotions(effect, amplifier);
